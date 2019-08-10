@@ -1,6 +1,4 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.paginate = (collection, page, perPage) => {
+export const paginate = <T>(collection: T[], page: number, perPage: number) => {
     const paginatedCollection = {
         total: collection.length,
         page,

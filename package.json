@@ -6,10 +6,13 @@
     "author": "Leonid Logvinov <logvinov.leon@gmail.com>",
     "license": "Apache-2.0",
     "scripts": {
-        "prettier": "yarn prettier:js && yarn prettier:ts",
+        "prettier": "yarn prettier:ts",
         "build": "yarn build:ts && shx rm -rf js && shx cp -r ts/lib/ js",
-        "prettier:js": "prettier --write 'js/**/*.js' --config .prettierrc",
-        "start:js": "node -r dotenv/config js/index.js"
+        "build:ts": "tsc -p ts/tsconfig.json",
+        "watch:ts": "tsc -w -p ts/tsconfig.json",
+        "prettier:ts": "prettier --write 'ts/**/*.ts' --config .prettierrc",
+        "start:ts": "node -r dotenv/config ts/lib/index.js",
+        "lint:ts": "tslint --project ts --format stylish"
     },
     "devDependencies": {
         "@0x/tslint-config": "^3.0.1",
@@ -19,7 +22,9 @@
         "@types/lodash": "^4.14.126",
         "@types/web3-provider-engine": "^14.0.0",
         "prettier": "^1.17.0",
-        "shx": "^0.3.2"
+        "shx": "^0.3.2",
+        "tslint": "^5.16.0",
+        "typescript": "^3.4.5"
     },
     "dependencies": {
         "0x.js": "^6.0.11",

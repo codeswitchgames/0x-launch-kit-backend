@@ -1,30 +1,31 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-require('@babel/polyfill');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const express = require('express');
-const asyncHandler = require('express-async-handler');
-require('reflect-metadata');
-const config = require('./config');
-const db_connection_1 = require('./db_connection');
-const handlers_1 = require('./handlers');
-const error_handling_1 = require('./middleware/error_handling');
-const url_params_parsing_1 = require('./middleware/url_params_parsing');
-const utils_1 = require('./utils');
+import '@babel/polyfill';
+import * as bodyParser from 'body-parser';
+import * as cors from 'cors';
+import * as express from 'express';
+import * as asyncHandler from 'express-async-handler';
+import 'reflect-metadata';
+
+import * as config from './config';
+import { initDBConnectionAsync } from './db_connection';
+import { Handlers } from './handlers';
+import { errorHandler } from './middleware/error_handling';
+import { urlParamsParsing } from './middleware/url_params_parsing';
+import { utils } from './utils';
+
 (async () => {
-    await db_connection_1.initDBConnectionAsync();
-    const handlers = new handlers_1.Handlers();
+    await initDBConnectionAsync();
+    const handlers = new Handlers();
     await handlers.initOrderBookAsync();
     const app = express();
     app.use(cors());
     app.use(bodyParser.json());
-    app.use(url_params_parsing_1.urlParamsParsing);
+    app.use(urlParamsParsing);
+
     /**
      * GET AssetPairs endpoint retrieves a list of available asset pairs and the information required to trade them.
      * http://sra-spec.s3-website-us-east-1.amazonaws.com/#operation/getAssetPairs
      */
-    app.get('/v2/asset_pairs', asyncHandler(handlers_1.Handlers.assetPairsAsync.bind(handlers_1.Handlers)));
+    app.get('/v2/asset_pairs', asyncHandler(Handlers.assetPairsAsync.bind(Handlers)));
     /**
      * GET Orders endpoint retrieves a list of orders given query parameters.
      * http://sra-spec.s3-website-us-east-1.amazonaws.com/#operation/getOrders
@@ -39,12 +40,12 @@ const utils_1 = require('./utils');
      * POST Order config endpoint retrives the values for order fields that the relayer requires.
      * http://sra-spec.s3-website-us-east-1.amazonaws.com/#operation/getOrderConfig
      */
-    app.post('/v2/order_config', handlers_1.Handlers.orderConfig.bind(handlers_1.Handlers));
+    app.post('/v2/order_config', Handlers.orderConfig.bind(Handlers));
     /**
      * GET FeeRecepients endpoint retrieves a collection of all fee recipient addresses for a relayer.
      * http://sra-spec.s3-website-us-east-1.amazonaws.com/v2/fee_recipients
      */
-    app.get('/v2/fee_recipients', handlers_1.Handlers.feeRecipients.bind(handlers_1.Handlers));
+    app.get('/v2/fee_recipients', Handlers.feeRecipients.bind(Handlers));
     /**
      * POST Order endpoint submits an order to the Relayer.
      * http://sra-spec.s3-website-us-east-1.amazonaws.com/#operation/postOrder
@@ -54,10 +55,12 @@ const utils_1 = require('./utils');
      * GET Order endpoint retrieves the order by order hash.
      * http://sra-spec.s3-website-us-east-1.amazonaws.com/#operation/getOrder
      */
-    app.get('/v2/order/:orderHash', asyncHandler(handlers_1.Handlers.getOrderByHashAsync.bind(handlers_1.Handlers)));
-    app.use(error_handling_1.errorHandler);
+    app.get('/v2/order/:orderHash', asyncHandler(Handlers.getOrderByHashAsync.bind(Handlers)));
+
+    app.use(errorHandler);
+
     app.listen(config.HTTP_PORT, () => {
-        utils_1.utils.log(
+        utils.log(
             `Standard relayer API (HTTP) listening on port ${config.HTTP_PORT}!\nConfig: ${JSON.stringify(
                 config,
                 null,
@@ -65,4 +68,4 @@ const utils_1 = require('./utils');
             )}`,
         );
     });
-})().catch(utils_1.utils.log);
+})().catch(utils.log);

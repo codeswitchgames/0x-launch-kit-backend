@@ -1,61 +1,66 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
 // tslint:disable:custom-no-magic-numbers
-const _0x_js_1 = require('0x.js');
-const assert_1 = require('@0x/assert');
-const crypto = require('crypto');
-const fs = require('fs');
-const _ = require('lodash');
-const path = require('path');
-const metadataPath = path.join(__dirname, '../metadata.json');
-var EnvVarType;
-(function(EnvVarType) {
-    EnvVarType[(EnvVarType['Port'] = 0)] = 'Port';
-    EnvVarType[(EnvVarType['NetworkId'] = 1)] = 'NetworkId';
-    EnvVarType[(EnvVarType['FeeRecipient'] = 2)] = 'FeeRecipient';
-    EnvVarType[(EnvVarType['UnitAmount'] = 3)] = 'UnitAmount';
-    EnvVarType[(EnvVarType['Url'] = 4)] = 'Url';
-    EnvVarType[(EnvVarType['WhitelistAllTokens'] = 5)] = 'WhitelistAllTokens';
-})(EnvVarType || (EnvVarType = {}));
+import { BigNumber } from '0x.js';
+import { assert } from '@0x/assert';
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as _ from 'lodash';
+import * as path from 'path';
+
+const metadataPath = path.join(__dirname, '../../metadata.json');
+enum EnvVarType {
+    Port,
+    NetworkId,
+    FeeRecipient,
+    UnitAmount,
+    Url,
+    WhitelistAllTokens,
+}
 // Whitelisted token addresses. Set to a '*' instead of an array to allow all tokens.
-exports.WHITELISTED_TOKENS = _.isEmpty(process.env.WHITELIST_ALL_TOKENS)
-    ? ['0x2002d3812f58e35f0ea1ffbf80a75a38c32175fa', '0xd0a1e359811322d97991e03f863a0c30c2cf029c']
+export const WHITELISTED_TOKENS: string[] | '*' = _.isEmpty(process.env.WHITELIST_ALL_TOKENS)
+    ? [
+          '0x2002d3812f58e35f0ea1ffbf80a75a38c32175fa', // ZRX on Kovan
+          '0xd0a1e359811322d97991e03f863a0c30c2cf029c', // WETH on Kovan
+      ]
     : assertEnvVarType('WHITELIST_ALL_TOKENS', process.env.WHITELIST_ALL_TOKENS, EnvVarType.WhitelistAllTokens);
+
 // Network port to listen on
-exports.HTTP_PORT = _.isEmpty(process.env.HTTP_PORT)
+export const HTTP_PORT = _.isEmpty(process.env.HTTP_PORT)
     ? 3000
     : assertEnvVarType('HTTP_PORT', process.env.HTTP_PORT, EnvVarType.Port);
 // Default network id to use when not specified
-exports.NETWORK_ID = _.isEmpty(process.env.NETWORK_ID)
+export const NETWORK_ID = _.isEmpty(process.env.NETWORK_ID)
     ? 42
     : assertEnvVarType('NETWORK_ID', process.env.NETWORK_ID, EnvVarType.NetworkId);
 // The fee recipient for orders
-exports.FEE_RECIPIENT = _.isEmpty(process.env.FEE_RECIPIENT)
+export const FEE_RECIPIENT = _.isEmpty(process.env.FEE_RECIPIENT)
     ? getDefaultFeeRecipient()
     : assertEnvVarType('FEE_RECIPIENT', process.env.FEE_RECIPIENT, EnvVarType.FeeRecipient);
 // A flat fee in ZRX that should be charged to the order maker
-exports.MAKER_FEE_ZRX_UNIT_AMOUNT = _.isEmpty(process.env.MAKER_FEE_ZRX_UNIT_AMOUNT)
-    ? new _0x_js_1.BigNumber(0)
+export const MAKER_FEE_ZRX_UNIT_AMOUNT = _.isEmpty(process.env.MAKER_FEE_ZRX_UNIT_AMOUNT)
+    ? new BigNumber(0)
     : assertEnvVarType('MAKER_FEE_ZRX_UNIT_AMOUNT', process.env.MAKER_FEE_ZRX_UNIT_AMOUNT, EnvVarType.UnitAmount);
 // A flat fee in ZRX that should be charged to the order taker
-exports.TAKER_FEE_ZRX_UNIT_AMOUNT = _.isEmpty(process.env.TAKER_FEE_ZRX_UNIT_AMOUNT)
-    ? new _0x_js_1.BigNumber(0)
+export const TAKER_FEE_ZRX_UNIT_AMOUNT = _.isEmpty(process.env.TAKER_FEE_ZRX_UNIT_AMOUNT)
+    ? new BigNumber(0)
     : assertEnvVarType('TAKER_FEE_ZRX_UNIT_AMOUNT', process.env.TAKER_FEE_ZRX_UNIT_AMOUNT, EnvVarType.UnitAmount);
 // Ethereum RPC url
-exports.RPC_URL = _.isEmpty(process.env.RPC_URL)
+export const RPC_URL = _.isEmpty(process.env.RPC_URL)
     ? 'https://kovan.infura.io/v3/f215624b820f46028eb77aef44c5b400'
     : assertEnvVarType('RPC_URL', process.env.RPC_URL, EnvVarType.Url);
+
 // Address used when simulating transfers from the maker as part of 0x order validation
-exports.DEFAULT_TAKER_SIMULATION_ADDRESS = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+export const DEFAULT_TAKER_SIMULATION_ADDRESS = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
 // A time window after which the order is considered permanently expired
-exports.ORDER_SHADOWING_MARGIN_MS = 100 * 1000; // tslint:disable-line custom-no-magic-numbers
+export const ORDER_SHADOWING_MARGIN_MS = 100 * 1000; // tslint:disable-line custom-no-magic-numbers
 // Frequency of checks for permanently expired orders
-exports.PERMANENT_CLEANUP_INTERVAL_MS = 10 * 1000; // tslint:disable-line custom-no-magic-numbers
+export const PERMANENT_CLEANUP_INTERVAL_MS = 10 * 1000; // tslint:disable-line custom-no-magic-numbers
 // Max number of entities per page
-exports.MAX_PER_PAGE = 1000;
+export const MAX_PER_PAGE = 1000;
 // Default ERC20 token precision
-exports.DEFAULT_ERC20_TOKEN_PRECISION = 18;
-function assertEnvVarType(name, value, expectedType) {
+export const DEFAULT_ERC20_TOKEN_PRECISION = 18;
+
+function assertEnvVarType(name: string, value: any, expectedType: EnvVarType): any {
     let returnValue;
     switch (expectedType) {
         case EnvVarType.Port:
@@ -77,14 +82,14 @@ function assertEnvVarType(name, value, expectedType) {
             }
             return returnValue;
         case EnvVarType.FeeRecipient:
-            assert_1.assert.isETHAddressHex(name, value);
+            assert.isETHAddressHex(name, value);
             return value;
         case EnvVarType.Url:
-            assert_1.assert.isUri(name, value);
+            assert.isUri(name, value);
             return value;
         case EnvVarType.UnitAmount:
             try {
-                returnValue = new _0x_js_1.BigNumber(parseFloat(value));
+                returnValue = new BigNumber(parseFloat(value));
                 if (returnValue.isNegative()) {
                     throw new Error();
                 }
@@ -98,10 +103,10 @@ function assertEnvVarType(name, value, expectedType) {
             throw new Error(`Unrecognised EnvVarType: ${expectedType} encountered for variable ${name}.`);
     }
 }
-function getDefaultFeeRecipient() {
+function getDefaultFeeRecipient(): string {
     const metadata = JSON.parse(fs.readFileSync(metadataPath).toString());
-    const existingDefault = metadata.DEFAULT_FEE_RECIPIENT;
-    const newDefault = existingDefault || `0xabcabc${crypto.randomBytes(17).toString('hex')}`;
+    const existingDefault: string = metadata.DEFAULT_FEE_RECIPIENT;
+    const newDefault: string = existingDefault || `0xabcabc${crypto.randomBytes(17).toString('hex')}`;
     if (_.isEmpty(existingDefault)) {
         const metadataCopy = JSON.parse(JSON.stringify(metadata));
         metadataCopy.DEFAULT_FEE_RECIPIENT = newDefault;

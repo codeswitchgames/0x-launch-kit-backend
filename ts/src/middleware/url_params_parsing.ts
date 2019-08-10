@@ -1,30 +1,31 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-const _ = require('lodash');
-const config_1 = require('../config');
-const errors_1 = require('../errors');
+import * as express from 'express';
+import * as _ from 'lodash';
+
+import { NETWORK_ID } from '../config';
+import { ValidationError } from '../errors';
+
 /**
  * Parses URL params and stores them on the request object
  */
-function urlParamsParsing(req, _res, next) {
+export function urlParamsParsing(req: express.Request, _res: express.Response, next: express.NextFunction): void {
     const networkId = parseNetworkId(req.query.networkId);
     // HACK: This is the recommended way to pass data from middlewares on. It's not beautiful nor fully type-safe.
     req.networkId = networkId;
     next();
 }
-exports.urlParamsParsing = urlParamsParsing;
-function parseNetworkId(networkIdStrIfExists) {
+
+function parseNetworkId(networkIdStrIfExists?: string): number {
     if (networkIdStrIfExists === undefined) {
-        return config_1.NETWORK_ID;
+        return NETWORK_ID;
     } else {
         const networkId = _.parseInt(networkIdStrIfExists);
-        if (networkId !== config_1.NETWORK_ID) {
+        if (networkId !== NETWORK_ID) {
             const validationErrorItem = {
                 field: 'networkId',
                 code: 1004,
                 reason: `Incorrect Network ID: ${networkIdStrIfExists}`,
             };
-            throw new errors_1.ValidationError([validationErrorItem]);
+            throw new ValidationError([validationErrorItem]);
         }
         return networkId;
     }

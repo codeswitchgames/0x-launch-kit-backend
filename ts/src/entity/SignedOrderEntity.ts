@@ -1,10 +1,10 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-const typeorm_1 = require('typeorm');
-const SignedOrderModel_1 = require('../models/SignedOrderModel');
-exports.signedOrderEntity = new typeorm_1.EntitySchema({
+import { EntitySchema } from 'typeorm';
+
+import { SignedOrderModel } from '../models/SignedOrderModel';
+
+export const signedOrderEntity = new EntitySchema<SignedOrderModel>({
     name: 'SignedOrder',
-    target: SignedOrderModel_1.SignedOrderModel,
+    target: SignedOrderModel,
     columns: {
         hash: {
             primary: true,
