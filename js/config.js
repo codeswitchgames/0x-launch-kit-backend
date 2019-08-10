@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const _ = require('lodash');
 const path = require('path');
-const metadataPath = path.join(__dirname, '../../metadata.json');
+const metadataPath = path.join(__dirname, '../metadata.json');
 var EnvVarType;
 (function(EnvVarType) {
     EnvVarType[(EnvVarType['Port'] = 0)] = 'Port';
